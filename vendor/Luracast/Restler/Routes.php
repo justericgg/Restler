@@ -128,7 +128,7 @@ class Routes
                 if (is_null($type) && isset($m['type'])) {
                     $type = $m['type'];
                 }
-                if ($m['name'] == 'email' && empty($m[CommentParser::$embeddedDataName]['type']) && $type=='string')
+                if ($m['name'] == 'email' && empty($m[CommentParser::$embeddedDataName]['type']) && $type == 'string')
                     $m[CommentParser::$embeddedDataName]['type'] = 'email';
                 $m ['default'] = $defaults [$position];
                 $m ['required'] = !$param->isOptional();
@@ -440,6 +440,7 @@ class Routes
     {
         $map = array();
         $all = Util::nestedValue(self::$routes, "v$version");
+        $filter = array();
         if (isset($all['*'])) {
             $all = $all['*'] + $all;
             unset($all['*']);
@@ -457,9 +458,13 @@ class Routes
                         continue 2;
                     }
                 }
-                $route['httpMethod'] = $httpMethod;
-                $map[$route['metadata']['resourcePath']][]
-                    = array('access' => static::verifyAccess($route), 'route' => $route);
+                $check = "$httpMethod " . $route['url'];
+                if (!$filter[$check]) {
+                    $route['httpMethod'] = $httpMethod;
+                    $map[$route['metadata']['resourcePath']][]
+                        = array('access' => static::verifyAccess($route), 'route' => $route);
+                    $filter[$check] = true;
+                }
             }
         }
         return $map;
